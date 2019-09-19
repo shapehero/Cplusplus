@@ -1,0 +1,47 @@
+关于OpenCV中的Stitching模块，是OpenCV2.4.0的一个新模块，功能是实现图像拼接，所有的函数都被封装在Stitch类中。Stitcher类的内部实现的过程 是非常繁琐的，需要很多算法的支持，包括图像特征的寻找和匹配，摄像机的校准，图像的变形，曝光补偿和图像整合。
+
+stitching_detail程序运行流程
+	1,命令行调用程序，输入源图像以及程序的参数
+	2,特征点检测，判断是使用surf还是orb,默认是surf。
+	3,对图像的特征点进行匹配，使用最近邻和次近邻方法，将两个最优的匹配置信度保存下来。
+	4,对图像进行排序以及交置信度高的图像保存到同一个集合中，删除置信度比较低的图像间的匹配，得到能正确匹配的图像序列。这样将置信度高于门限的所有匹配合并到一个集合中。
+	5,对所有图像进行相机参数粗略估计，然后求出旋转矩阵
+	6,使用光束平均法进一步精准的估计出旋转矩阵
+	7,波形校正，水平或者垂直
+	8,拼接
+	9,融合，多频段融合，光照补偿。
+
+stitch()返回值说明
+	Stitcher::OK(0)
+		图像拼接成功
+	Stitcher::ERR_NEED_MORE_IMGS(1)
+		需要输入更多图像构建全景，通常，如果输入图像中检测不到足够的关键点，则会发生此错误。
+	Stitcher::ERR_HOMOGRAPHY_EST_FAIL(2)
+		当RANSAC单应性估计失败时，会发生此错误。同样，可能需要更多图像或者图像没有足够的区别，独特的纹理/对象，以便准确匹配关键点
+	Stitcher::ERR_CAMERA_PARAMS_ADJUST_FAIL(3)
+		比较少出现，它与未能从输入图像中正确估计相机内参和外参有关。
+
+
+OpenCV中关于sitch模块的代码走读
+1, CV_INSTRUMENT_REGION()	是OPENCV相关算法表现性能测试框架，测量函数执行时间 ，在函数内部追踪函数执行状况。
+2, CV_WRAP	是用来包装函数或方法的一个标记，主要为了Python和Java的接口封装。
+3, UMat是是OpenCV3中新引入的图像容器对象，与常用的Mat容器有相似的功能和相同的API函数，并且二者可以很容易的相互转换。
+    引入UMat的目的是为了支持OpenCL的CPU和GPU平台上，使用OpenCL加速，同时，同一套代码 在不支持OpenCL的平台上也可以按Mat常规的方式 进行计算，而不会报错，这样一套代码即可。
+
+
+
+遇到的问题：
+	重新编译OpenCV的源代码时，出现静态库（*.a）问题，这个问题后续会造成videoCapture无法打开视频文件，打开视频文件后就直接段错误死掉了（段的位置位于malloc.c文件中）
+	1,编译显示的错误：Linking CXX shared library ../../lib/libopencv_highgui.so
+	/usr/bin/ld: /usr/local/lib/libavcodec.a(lpc_mmx.o): relocation R_X86_64_PC32 against symbol `ff_pd_1′ can not be used when making a shared object; recompile with -fPIC
+	/usr/bin/ld: final link failed: Bad value
+解决方法：
+	1，视频文件打开失败可以确定是videoio库问题造成的
+	2, 这部分链接的是静态库，在编译opencv是刚好回避了此问题（静态库重命名方式）
+	3, 通过对OpenCV的依赖库x264和ffmpeg的源代码的安装（使用配置选项--enable-shared和--enable-pic）
+	4, 依赖库x264和ffmpeg编译安装之后，opencv需要重新清除build然后再编译才有效
+参考博文：
+	1,http://blog.sina.com.cn/s/blog_4b9eab320102uxae.html
+	2,http://www.ozbotz.org/opencv-installation-2-3-1/
+
+
