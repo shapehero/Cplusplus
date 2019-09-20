@@ -1,2 +1,2 @@
-# Cplusplus
-c++ learning
+# C/Cplusplus
+c/c++ learning
