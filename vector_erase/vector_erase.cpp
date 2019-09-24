@@ -28,5 +28,9 @@ int main(int argc, char *argv[])
 	for (vector<int>::const_iterator iter = v.begin(); iter != v.end(); iter++)
 		cout << *iter << endl;
 
+	vector<int>::iterator it;
+	cout << "sizeof(it): " << sizeof(it) << endl;
+	//8
+
 	return 0;
 }
