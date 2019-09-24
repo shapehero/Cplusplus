@@ -44,4 +44,18 @@ OpenCV中关于sitch模块的代码走读
 	1,http://blog.sina.com.cn/s/blog_4b9eab320102uxae.html
 	2,http://www.ozbotz.org/opencv-installation-2-3-1/
 
+Image Stitching 模块下共包含七个子模块，分别为：
+1,Features Finding and Image Matching 功能查找和图像匹配
+2,Rotation Estimation	轮换估计
+3,Autocalibration	自动校准
+4,Images Warping 	图像变形
+5,Seam Estimation	接缝估计
+6,Exposure Compensation	曝光补偿
+7,Image Blenders	图像搅拌机
+
+
+Mat数据结构
+	OpenCV中最基本的数据结构，是Matrix的简称，Header和Pointer。
+	Header中主要包含矩阵的大小，存储方式，存储地址等信息；Pointer中存储指向像素值的指针。
+
 
